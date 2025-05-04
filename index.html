@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #turnIndicator {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-gap: 5px;
+            justify-content: center;
+        }
+        #winMessage {
+            font-size: 2em;
+            color: green;
+            margin-top: 20px;
+            height: 20px;
+        }
+        #moveMessage {
+            font-size: 1.2em;
+            color: red;
+            margin-top: 10px;
+            height: 20px;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: #ddd;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .piece {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .red {
+            background-color: red;
+        }
+        .blue {
+            background-color: blue;
+        }
+        .hover-piece {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: grey;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Connect 4</h1>
+    <div id="turnIndicator">Turn: Red</div>
+    <div id="board"></div>
+    <div id="winMessage"></div>
+    <div id="moveMessage"></div>
+
+    <script>
+        const board = document.getElementById('board');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const rows = 8;
+        const cols = 8;
+        let currentPlayer = 'red';
+        const gameState = Array(rows).fill(null).map(() => Array(cols).fill(null));
+
+        function createBoard() {
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.addEventListener('click', handleCellClick);
+                    cell.addEventListener('mouseover', handleMouseOver);
+                    cell.addEventListener('mouseout', handleMouseOut);
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        function handleMouseOver(event) {
+            const col = parseInt(event.target.dataset.col);
+            for (let row = rows - 1; row >= 0; row--) {
+                if (!gameState[row][col]) {
+                    const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                    if (!cell.querySelector('.piece')) {
+                        const hoverPiece = document.createElement('div');
+                        hoverPiece.classList.add('piece', 'hover-piece');
+                        hoverPiece.style.backgroundColor = 'grey';
+                        cell.appendChild(hoverPiece);
+                    }
+                    return;
+                }
+            }
+        }
+
+        function handleMouseOut(event) {
+            const col = parseInt(event.target.dataset.col);
+            for (let row = rows - 1; row >= 0; row--) {
+                const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                const hoverPiece = cell.querySelector('.hover-piece');
+                if (hoverPiece) {
+                    cell.removeChild(hoverPiece);
+                }
+            }
+        }
+
+        function handleCellClick(event) {
+            const col = parseInt(event.target.dataset.col);
+            for (let row = rows - 1; row >= 0; row--) {
+                if (!gameState[row][col]) {
+                    gameState[row][col] = currentPlayer;
+                    const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                    const piece = document.createElement('div');
+                    piece.classList.add('piece', currentPlayer);
+                    cell.appendChild(piece);
+
+                    currentPlayer = currentPlayer === 'red' ? 'blue' : 'red';
+                    turnIndicator.textContent = `Turn: ${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}`;
+
+                    handleMouseOut(event);
+                    handleMouseOver(event);
+
+                    if (checkWin(row, col)) {
+                        console.log(`${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)} wins!`);
+                        document.getElementById('winMessage').textContent = `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)} wins!`;
+                        setTimeout(() => {
+                            resetGame();
+                        }, 5000);
+                        return;
+                    }
+                    
+                    return;
+                }
+            }
+            document.getElementById('moveMessage').textContent = 'INVALID MOVE!';
+            setTimeout(() => {
+                document.getElementById('moveMessage').textContent = '';
+            }, 2000);
+        }
+
+        function checkWin(row, col) {
+            const directions = [
+                [[0, 1], [0, -1]], // Horizontal
+                [[1, 0], [-1, 0]], // Vertical
+                [[1, 1], [-1, -1]], // Diagonal \
+                [[1, -1], [-1, 1]]  // Diagonal /
+            ];
+            for (const direction of directions) {
+                let count = 1;
+                for (const [dx, dy] of direction) {
+                    let r = row + dx;
+                    let c = col + dy;
+                    while (r >= 0 && r < rows && c >= 0 && c < cols && gameState[r][c] === currentPlayer) {
+                        count++;
+                        r += dx;
+                        c += dy;
+                    }
+                }
+                if (count >= 4) return true;
+            }
+            return false;
+        }
+
+        function resetGame() {
+            board.innerHTML = '';
+            gameState.forEach(row => row.fill(null));
+            currentPlayer = 'red';
+            turnIndicator.textContent = 'Turn: Red';
+            createBoard();
+            document.getElementById('winMessage').textContent = '';
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
