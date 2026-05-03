@@ -4,7 +4,7 @@ A simple Connect 4 game implemented in HTML, CSS, and JavaScript.
 
 ## Play the Game
 
-You can play the game online at: [https://joemw.github.io/Connect4/](https://joemw.github.io/Connect4/)
+You can play the game online at: [https://dulinboyos1.github.io/Connect4/](https://dulinboyos1.github.io/Connect4/)
 
 ## How to Play
 
