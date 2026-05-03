@@ -124,27 +124,27 @@
             const col = parseInt(event.target.dataset.col);
             for (let row = rows - 1; row >= 0; row--) {
                 if (!gameState[row][col]) {
-                    gameState[row][col] = currentPlayer;
+                    const placedPlayer = currentPlayer;
+                    gameState[row][col] = placedPlayer;
                     const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
                     const piece = document.createElement('div');
-                    piece.classList.add('piece', currentPlayer);
+                    piece.classList.add('piece', placedPlayer);
                     cell.appendChild(piece);
-
-                    currentPlayer = currentPlayer === 'red' ? 'blue' : 'red';
-                    turnIndicator.textContent = `Turn: ${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}`;
 
                     handleMouseOut(event);
                     handleMouseOver(event);
 
-                    if (checkWin(row, col)) {
-                        console.log(`${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)} wins!`);
-                        document.getElementById('winMessage').textContent = `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)} wins!`;
+                    if (checkWin(row, col, placedPlayer)) {
+                        console.log(`${placedPlayer.charAt(0).toUpperCase() + placedPlayer.slice(1)} wins!`);
+                        document.getElementById('winMessage').textContent = `${placedPlayer.charAt(0).toUpperCase() + placedPlayer.slice(1)} wins!`;
                         setTimeout(() => {
                             resetGame();
                         }, 5000);
                         return;
                     }
-                    
+
+                    currentPlayer = placedPlayer === 'red' ? 'blue' : 'red';
+                    turnIndicator.textContent = `Turn: ${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}`;
                     return;
                 }
             }
@@ -154,7 +154,7 @@
             }, 2000);
         }
 
-        function checkWin(row, col) {
+        function checkWin(row, col, player) {
             const directions = [
                 [[0, 1], [0, -1]], // Horizontal
                 [[1, 0], [-1, 0]], // Vertical
@@ -166,7 +166,7 @@
                 for (const [dx, dy] of direction) {
                     let r = row + dx;
                     let c = col + dy;
-                    while (r >= 0 && r < rows && c >= 0 && c < cols && gameState[r][c] === currentPlayer) {
+                    while (r >= 0 && r < rows && c >= 0 && c < cols && gameState[r][c] === player) {
                         count++;
                         r += dx;
                         c += dy;
